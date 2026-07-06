@@ -119,7 +119,7 @@ export class Track extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     this.cameras.main.setBackgroundColor('#14351f');
     if (this.localCar) {
-      this.cameras.main.startFollow(this.localCar.sprite, true, 0.08, 0.08);
+      this.cameras.main.startFollow(this.localCar.sprite, true, 0.6, 0.6);
     }
     this.fitZoom();
     this.scale.on('resize', this.fitZoom, this);
@@ -144,7 +144,7 @@ export class Track extends Phaser.Scene {
     );
     // Bump zoom slightly on small (mobile) screens so the car reads bigger.
     const isMobile = this.scale.width < 900;
-    this.baseZoom = Math.max(0.5, zoom) * (isMobile ? 1.3 : 1);
+    this.baseZoom = Math.max(0.5, zoom) * (isMobile ? 1.7 : 1);
     this.cameras.main.setZoom(this.baseZoom);
   }
 
