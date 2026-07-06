@@ -81,6 +81,12 @@ class VibrationManager {
     // Celebratory rhythm
     this.vibrate([150, 100, 150, 100, 300], 0.8);
   }
+
+  /** Trigger a continuous or pulsed vibration when driving on grass. */
+  vibrateGrass(intensity: number = 0.25): void {
+    // A short, light pulse (e.g., 50ms) that can be triggered repeatedly or periodically
+    this.vibrate(50, intensity);
+  }
 }
 
 let instance: VibrationManager | null = null;

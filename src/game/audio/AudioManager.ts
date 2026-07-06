@@ -44,7 +44,7 @@ class AudioManager {
     this.engineSound = scene.sound.add('engine', { loop: true, volume: 0 });
     this.screechSound = scene.sound.add('screech', { loop: true, volume: 0 });
     this.crashSound = scene.sound.add('crash', { volume: 0.3 });
-    this.finishSound = scene.sound.add('finish', { volume: 0.7 });
+    this.finishSound = scene.sound.add('finish', { volume: 0.5 });
     this.musicSound = scene.sound.add('music', { loop: true, volume: 0.25 });
 
     // Unlock audio context on first user interaction (browser autoplay policy).

@@ -173,7 +173,7 @@ export function HUD() {
       {/* Mute button */}
       <button
         onClick={() => setMuted(!muted)}
-        className="pointer-events-auto absolute bottom-3 right-3 rounded-lg border border-asphalt-700 bg-asphalt/70 p-2 text-silver-dim backdrop-blur transition hover:text-silver sm:hidden"
+        className="pointer-events-auto absolute bottom-24 md:bottom-3 right-3 rounded-lg border border-asphalt-700 bg-asphalt/70 p-2 text-silver-dim backdrop-blur transition hover:text-silver sm:hidden"
         title={muted ? 'Unmute' : 'Mute'}
       >
         {muted ? (

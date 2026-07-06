@@ -12,11 +12,11 @@ All audio files used in this game are free for use, with attribution noted below
 
 ## screech.wav — Tire Screech
 
-- **Source**: [Freesound #538213](https://freesound.org/people/oldestmillennial/sounds/538213/)
-- **Author**: oldestmillennial
-- **Title**: Tires.wav
+- **Source**: [Freesound #104026](https://freesound.org/people/RutgerMuller/sounds/104026/)
+- **Author**: RutgerMuller
+- **Title**: Tires Squeaking.aif
 - **License**: CC0 1.0 Universal (Public Domain Dedication)
-- **Description**: Tire squeals recorded with Zoom H5 with XY capsule. Heavily noise-reduced and EQ'd.
+- **Description**: Rubber tires breaking and squeaking on the streets of Hilversum, Netherlands. Recorded with Rode NT4 XY-Stereo Mic and Zoom H4 Handy Recorder.
 
 ## crash.wav — Car Crash
 

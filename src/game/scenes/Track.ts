@@ -18,6 +18,7 @@ import { CAR_COLORS, type CarState, type InputFrame } from '../../types';
 import {
   CENTERLINE,
   CHECKPOINTS,
+  isOnTrack,
   ROAD_WIDTH,
   START,
   START_ANGLE,
@@ -72,6 +73,7 @@ export class Track extends Phaser.Scene {
   private prevRaceStatus: 'lobby' | 'countdown' | 'racing' | 'finished' =
     'lobby';
   private prevLocalLap = 0;
+  private grassVibrateAcc = 0;
 
   constructor() {
     super('Track');
@@ -125,7 +127,7 @@ export class Track extends Phaser.Scene {
       | undefined;
     if (vignette) {
       vignette.strength = 0.4;
-      vignette.radius = 0.75;
+      vignette.radius = 0.8;
     }
 
     if (this.localCar) {
@@ -206,6 +208,7 @@ export class Track extends Phaser.Scene {
 
     for (const car of this.cars) car.render(dt);
     this.updateAudio();
+    this.updateGrassVibration(dt);
     this.updateVisuals(dt);
     this.pushHud(dt);
   }
@@ -384,6 +387,26 @@ export class Track extends Phaser.Scene {
       audio.startScreech();
     } else {
       audio.stopScreech();
+    }
+  }
+
+  // ---- per-frame grass vibration ----
+  // Pulse a light haptic at a fixed cadence while the local car is off-track
+  // and moving. The interval is short enough to feel like a continuous rumble
+  // but long enough that the device's vibration motor can settle between
+  // pulses.
+  private updateGrassVibration(dt: number): void {
+    if (!this.localCar) return;
+    const car = this.localCar;
+    const moving = Math.abs(car.speed) > 30;
+    if (!moving || isOnTrack(car.x, car.y)) {
+      this.grassVibrateAcc = 0;
+      return;
+    }
+    this.grassVibrateAcc += dt;
+    if (this.grassVibrateAcc >= 0.12) {
+      this.grassVibrateAcc = 0;
+      getVibration().vibrateGrass(0.25);
     }
   }
 
