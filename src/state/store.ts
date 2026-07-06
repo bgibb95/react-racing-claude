@@ -8,6 +8,7 @@ import type {
 } from '../types';
 import { CAR_COLORS, DEFAULT_LAPS } from '../types';
 import { getAudio } from '../game/audio/AudioManager';
+import { getVibration } from '../game/vibration/VibrationManager';
 
 /** Low-frequency HUD data pushed from the Phaser scene (~10Hz), kept out of the
  *  per-frame render path so React only re-renders when these scalars change. */
@@ -139,6 +140,7 @@ export const useGameStore = create<GameStore>((set) => ({
   setMuted: (muted) => {
     localStorage.setItem('apex-muted', muted ? 'true' : 'false');
     getAudio().setMuted(muted);
+    getVibration().setMuted(muted);
     set({ muted });
   },
 

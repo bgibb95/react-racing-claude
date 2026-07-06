@@ -14,6 +14,7 @@
 //                    audio.setMuted(bool)
 
 import Phaser from 'phaser';
+import { getVibration } from '../vibration/VibrationManager';
 
 class AudioManager {
   private scene: Phaser.Scene | null = null;
@@ -147,6 +148,14 @@ class AudioManager {
    */
   private playCountdownBeep(highPitch: boolean): void {
     if (this.muted) return;
+
+    // Trigger haptic feedback
+    if (highPitch) {
+      getVibration().vibrate(150, 0.8); // Stronger pulse for GO
+    } else {
+      getVibration().vibrateBeep(); // Standard light pulse for countdown
+    }
+
     try {
       const AudioCtx =
         window.AudioContext ||

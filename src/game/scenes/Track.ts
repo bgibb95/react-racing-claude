@@ -25,6 +25,7 @@ import {
   WORLD_WIDTH,
 } from '../track/circuit';
 import { getAudio } from '../audio/AudioManager';
+import { getVibration } from '../vibration/VibrationManager';
 
 const NET_HZ = 30;
 const NET_INTERVAL = 1 / NET_HZ;
@@ -96,11 +97,19 @@ export class Track extends Phaser.Scene {
     skidLayer.setDepth(2);
     setSkidGraphics(skidLayer);
 
-    // Audio: instantiate sounds and wire collision callback.
+    // Audio & Vibration: instantiate sounds and wire collision callback.
     const audio = getAudio();
     audio.create(this);
     audio.setMuted(store.muted);
-    setCollisionCallback(() => audio.playCrash());
+
+    const vibration = getVibration();
+    vibration.setMuted(store.muted);
+
+    setCollisionCallback((kind) => {
+      audio.playCrash();
+      // Vibrate slightly less for car-to-car bumps than barrier hits
+      vibration.vibrateCollision(kind === 'car' ? 0.6 : 1.0);
+    });
 
     this.cursors = this.input.keyboard!.createCursorKeys();
     this.wasd = this.input.keyboard!.addKeys('W,A,S,D') as typeof this.wasd;
@@ -206,6 +215,7 @@ export class Track extends Phaser.Scene {
     status: 'lobby' | 'countdown' | 'racing' | 'finished',
   ): void {
     const audio = getAudio();
+    const vibration = getVibration();
     if (status === 'countdown' && this.prevRaceStatus !== 'countdown') {
       // Schedule 3 low beeps + 1 high "GO" beep across the countdown duration.
       audio.playCountdownSequence(3200);
@@ -214,6 +224,7 @@ export class Track extends Phaser.Scene {
     } else if (status === 'finished' && this.prevRaceStatus !== 'finished') {
       audio.stopMusic();
       audio.playFinish();
+      vibration.vibrateFinish();
     }
     this.prevRaceStatus = status;
 
@@ -221,6 +232,7 @@ export class Track extends Phaser.Scene {
     if (this.localCar) {
       if (this.localCar.lap > this.prevLocalLap) {
         audio.playLap();
+        vibration.vibrateLap();
       }
       this.prevLocalLap = this.localCar.lap;
     }
