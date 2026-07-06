@@ -47,30 +47,45 @@ export class Boot extends Phaser.Scene {
     const h = 26;
     const g = this.add.graphics();
 
-    // Body (points along +x so rotation matches cos/sin heading).
+    // 1. MAIN BODY - Layered to create the iconic 911 "Hips"
     g.fillStyle(0xffffff, 1);
-    g.fillRoundedRect(0, 2, w, h - 4, 8);
 
-    // Slightly tapered nose highlight.
-    g.fillStyle(0xffffff, 1);
-    g.fillTriangle(w - 2, 4, w - 2, h - 4, w + 4, h / 2);
+    // Wide Rear Track / Fenders
+    g.fillRoundedRect(0, 2, 26, h - 4, 6);
 
-    // Cabin / windshield (stays dark regardless of tint).
+    // Narrower Front Track / Hood (creates a 2px inset on each side where they overlap)
+    g.fillRoundedRect(18, 4, w - 18, h - 8, 6);
+
+    // 2. ICONIC ROUND HEADLIGHTS (Sitting on the front fender arches)
+    // Dark housing first for depth
     g.fillStyle(0x1c1c22, 1);
-    g.fillRoundedRect(14, 5, 20, h - 10, 4);
-    g.fillStyle(0x3a3a44, 1);
-    g.fillRoundedRect(16, 6, 8, h - 12, 3); // windshield
+    g.fillCircle(w - 7, 6, 2.5);
+    g.fillCircle(w - 7, h - 6, 2.5);
+    // Bright Xenon/LED glow center
+    g.fillStyle(0xfffad0, 1);
+    g.fillCircle(w - 6, 6, 1.2);
+    g.fillCircle(w - 6, h - 6, 1.2);
 
-    // Rear wing.
+    // 3. TEARDROP CABIN / GREENHOUSE (Stays dark regardless of tint)
+    g.fillStyle(0x1c1c22, 1);
+    // Rear cabin glass (narrower)
+    g.fillRoundedRect(12, 7, 16, h - 14, 4);
+    // Front cabin glass (wider)
+    g.fillRoundedRect(22, 6, 11, h - 12, 4);
+
+    // 4. GLASS HIGHLIGHTS / REFLECTIONS
+    g.fillStyle(0x4a4a55, 1);
+    // Curved front windshield reflection
+    g.fillRoundedRect(30, 8, 2, h - 16, 1);
+    // Long sloping rear window reflection
+    g.fillRoundedRect(14, 9, 6, h - 18, 1);
+
+    // 5. REAR WHALE-TAIL SPOILER (Classic Turbo style)
     g.fillStyle(0x141419, 1);
-    g.fillRect(0, 1, 5, h - 2);
+    g.fillRect(1, 4, 3, h - 8);
 
-    // Headlights.
-    g.fillStyle(0xf3f0d0, 1);
-    g.fillRect(w - 4, 4, 3, 4);
-    g.fillRect(w - 4, h - 8, 3, 4);
-
-    g.generateTexture('car', w + 4, h);
+    // Generate texture and cleanup
+    g.generateTexture('car', w, h);
     g.destroy();
   }
 
