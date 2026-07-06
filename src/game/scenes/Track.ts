@@ -144,7 +144,7 @@ export class Track extends Phaser.Scene {
     );
     // Bump zoom slightly on small (mobile) screens so the car reads bigger.
     const isMobile = this.scale.width < 900;
-    this.baseZoom = Math.max(0.5, zoom) * (isMobile ? 1.7 : 1);
+    this.baseZoom = Math.max(0.5, zoom) * (isMobile ? 1.8 : 1);
     this.cameras.main.setZoom(this.baseZoom);
   }
 
