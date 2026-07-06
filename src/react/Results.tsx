@@ -1,6 +1,9 @@
+import { useEffect } from 'react';
 import { useGameStore } from '../state/store';
 import { leaveRoom, startRace } from '../net/controller';
 import { CAR_COLORS } from '../types';
+import { getAudio } from '../game/audio/AudioManager';
+import { getVibration } from '../game/vibration/VibrationManager';
 
 function colorCss(colorId: string): string {
   return CAR_COLORS.find((c) => c.id === colorId)?.css ?? '#fff';
@@ -20,20 +23,33 @@ const MEDAL = ['🥇', '🥈', '🥉'];
 export function Results() {
   const { results, isHost, localId } = useGameStore();
 
+  // Play the finish fanfare + celebratory haptic when the results screen
+  // mounts. The Phaser scene (and its sound objects) is destroyed the moment
+  // we navigate away from the race screen, so we trigger the sound from the
+  // React side via an HTML5 Audio element.
+  useEffect(() => {
+    getAudio().playFinishHtml5();
+    getVibration().vibrateFinish();
+  }, []);
+
   return (
     <div className="flex h-full w-full items-center justify-center overflow-y-auto p-4">
       <div className="w-full max-w-md">
         <h1 className="mb-1 text-center text-4xl font-black text-silver">
           Race <span className="text-race-red">Results</span>
         </h1>
-        <p className="mb-6 text-center text-sm text-silver-dim">Chequered flag!</p>
+        <p className="mb-6 text-center text-sm text-silver-dim">
+          Chequered flag!
+        </p>
 
         <ol className="space-y-2">
           {results.map((r) => (
             <li
               key={r.id}
               className={`flex items-center gap-3 rounded-lg px-4 py-3 ${
-                r.id === localId ? 'bg-race-red/15 ring-1 ring-race-red/40' : 'bg-asphalt-800'
+                r.id === localId
+                  ? 'bg-race-red/15 ring-1 ring-race-red/40'
+                  : 'bg-asphalt-800'
               }`}
             >
               <span className="w-8 text-center text-xl font-black text-silver-dim">

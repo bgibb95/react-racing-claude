@@ -105,6 +105,24 @@ class AudioManager {
     this.finishSound?.play();
   }
 
+  /**
+   * Play the finish fanfare via an HTML5 Audio element. Used by the React
+   * Results screen because the Phaser scene (and its sound objects) is
+   * destroyed the moment we navigate away from the race screen.
+   */
+  playFinishHtml5(): void {
+    if (this.muted) return;
+    try {
+      const audio = new Audio('/audio/finish.mp3');
+      audio.volume = 0.5;
+      audio.play().catch(() => {
+        // Autoplay blocked or audio unavailable — ignore silently.
+      });
+    } catch {
+      // Audio not available — ignore silently.
+    }
+  }
+
   /** Start the background music loop. */
   playMusic(): void {
     if (!this.musicSound || this.musicPlaying) return;
