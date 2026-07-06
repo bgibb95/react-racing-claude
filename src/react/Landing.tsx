@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useGameStore } from '../state/store';
 import { hostRoom, joinRoom, leaveRoom } from '../net/controller';
+import { hasConfiguredTurn } from '../net/ice';
 import { CAR_COLORS, ROOM_CODE_LENGTH } from '../types';
 
 export function Landing() {
@@ -161,6 +162,13 @@ export function Landing() {
         <p className="mt-6 text-center text-xs text-silver-dim">
           Peer-to-peer over WebRTC · no downloads · no accounts
         </p>
+
+        {!hasConfiguredTurn() && (
+          <p className="mx-auto mt-3 max-w-sm text-center text-xs text-gold/80">
+            Tip: to race friends on a different network, add a free TURN server
+            (see the README) — direct connections often fail across networks.
+          </p>
+        )}
       </div>
     </div>
   );

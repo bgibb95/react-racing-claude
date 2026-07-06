@@ -35,17 +35,37 @@ Open two browser windows (or `npm run dev -- --host` and use your phone on the L
 host in one, join in the other with the code, and race. To verify true cross-network
 play, join from a phone on **cellular** using the invite link.
 
-## Custom TURN server (recommended for production)
+## TURN server — required for cross-network play ⚠️
 
-The app ships with public STUN/TURN defaults that work out of the box but are
-best-effort. For reliability, create a free TURN account (e.g. metered.ca) and set:
+Playing with someone on a **different network** (e.g. a friend on their home
+Wi-Fi, or you on mobile data) almost always needs a **TURN relay** — WebRTC
+can't punch through symmetric NATs and strict firewalls on its own (~1/3 of
+connections). The app falls back to a public relay, but **free no-signup TURN is
+unreliable in 2026**, so if a join hangs and then errors with "Could not connect
+across networks", set up your own free TURN — it takes ~2 minutes:
+
+**Option A — REST endpoint (easiest).** Create a free app on
+[Metered](https://dashboard.metered.ca) (50 GB/mo free), copy your *TURN
+Credentials API* URL, and set:
 
 ```
 # .env
-VITE_TURN_URLS=turn:your.turn:80,turn:your.turn:443
+VITE_TURN_API_URL=https://<yourapp>.metered.live/api/v1/turn/credentials?apiKey=xxxxxxxx
+```
+
+**Option B — static credentials** (e.g. [ExpressTURN](https://www.expressturn.com),
+free 1000 GB/mo):
+
+```
+# .env
+VITE_TURN_URLS=turn:relay.example.com:80,turn:relay.example.com:443,turn:relay.example.com:443?transport=tcp
 VITE_TURN_USERNAME=...
 VITE_TURN_CREDENTIAL=...
 ```
+
+Restart `npm run dev` after editing `.env`. For the Vercel deploy, add the same
+`VITE_TURN_*` vars in **Project → Settings → Environment Variables** and redeploy.
+See [.env.example](.env.example) for details.
 
 ## Deploy to Vercel
 

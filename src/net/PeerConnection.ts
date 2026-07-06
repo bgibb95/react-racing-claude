@@ -5,11 +5,14 @@
 // - Guest: opens a single DataConnection to the host by room code.
 //
 // Signalling is handled by the free PeerJS cloud broker; media/data traverses
-// STUN/TURN (see ice.ts). No backend required.
+// STUN/TURN (see ice.ts). No backend required. ICE servers are resolved
+// asynchronously before the peer is created, and connection attempts are guarded
+// by a timeout + ICE-failure detection so a failed cross-network connect surfaces
+// an actionable error instead of hanging forever.
 
 import Peer, { type DataConnection } from 'peerjs';
 import { Emitter } from './emitter';
-import { buildIceServers } from './ice';
+import { hasConfiguredTurn, loadIceServers } from './ice';
 import type { GuestMessage, HostMessage, NetMessage } from './protocol';
 import { ROOM_CODE_LENGTH } from '../types';
 
@@ -17,6 +20,10 @@ import { ROOM_CODE_LENGTH } from '../types';
 const NS = 'apexrivals';
 // Ambiguity-free alphabet (no 0/O, 1/I/L).
 const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+// How long to wait for the broker to register us / the p2p link to open.
+const REGISTER_TIMEOUT_MS = 15000;
+const CONNECT_TIMEOUT_MS = 22000;
 
 export function generateRoomCode(): string {
   let code = '';
@@ -31,19 +38,12 @@ function peerIdForRoom(code: string): string {
 }
 
 interface PeerEvents extends Record<string, unknown> {
-  /** local peer registered with broker; payload = own peer id */
   open: string;
-  /** host: a guest's data connection opened; payload = guest peer id */
   'guest-connected': string;
-  /** host: a guest disconnected; payload = guest peer id */
   'guest-left': string;
-  /** guest: connection to host established */
   'host-connected': void;
-  /** guest: lost connection to host */
   'host-left': void;
-  /** any inbound message; payload = { from, msg } */
   message: { from: string; msg: NetMessage };
-  /** fatal or notable error; payload = human-readable reason */
   error: string;
 }
 
@@ -53,10 +53,14 @@ export class PeerConnection {
 
   private peer: Peer | null = null;
   private ownId = '';
-  /** host: guestId -> connection. guest: single 'host' entry. */
   private connections = new Map<string, DataConnection>();
   private hostConn: DataConnection | null = null;
   private destroyed = false;
+
+  private registerTimer: ReturnType<typeof setTimeout> | null = null;
+  private connectTimer: ReturnType<typeof setTimeout> | null = null;
+  private opened = false; // broker registration
+  private linked = false; // p2p link established
 
   private constructor(isHost: boolean) {
     this.isHost = isHost;
@@ -71,28 +75,44 @@ export class PeerConnection {
   }
 
   // ---- factory: host ----
-  static host(roomCode: string): PeerConnection {
+  static async host(roomCode: string): Promise<PeerConnection> {
     const pc = new PeerConnection(true);
+    const iceServers = await loadIceServers();
+    if (pc.destroyed) return pc;
     pc.ownId = peerIdForRoom(roomCode);
-    pc.peer = new Peer(pc.ownId, { config: { iceServers: buildIceServers() } });
+    pc.peer = new Peer(pc.ownId, { config: { iceServers } });
     pc.wireCommonPeerEvents();
     pc.peer.on('connection', (conn) => pc.acceptGuest(conn));
     return pc;
   }
 
   // ---- factory: guest ----
-  static join(roomCode: string): PeerConnection {
+  static async join(roomCode: string): Promise<PeerConnection> {
     const pc = new PeerConnection(false);
-    // Random guest id assigned by broker.
-    pc.peer = new Peer({ config: { iceServers: buildIceServers() } });
+    const iceServers = await loadIceServers();
+    if (pc.destroyed) return pc;
+    pc.peer = new Peer({ config: { iceServers } });
     pc.wireCommonPeerEvents();
+    // Guard: if the p2p link never opens, surface an actionable error.
+    pc.connectTimer = setTimeout(() => {
+      if (!pc.linked && !pc.destroyed) pc.events.emit('error', connectFailureMessage());
+    }, CONNECT_TIMEOUT_MS);
     pc.peer.on('open', () => pc.connectToHost(peerIdForRoom(roomCode)));
     return pc;
   }
 
   private wireCommonPeerEvents(): void {
     const peer = this.peer!;
+    // Guard: broker registration must complete.
+    this.registerTimer = setTimeout(() => {
+      if (!this.opened && !this.destroyed) {
+        this.events.emit('error', 'Could not reach the signalling server. Check your connection and try again.');
+      }
+    }, REGISTER_TIMEOUT_MS);
+
     peer.on('open', (id) => {
+      this.opened = true;
+      if (this.registerTimer) clearTimeout(this.registerTimer);
       this.ownId = id;
       this.events.emit('open', id);
     });
@@ -101,7 +121,6 @@ export class PeerConnection {
       this.events.emit('error', mapPeerError(type, this.isHost));
     });
     peer.on('disconnected', () => {
-      // Lost the broker socket (not the p2p link). Try to re-register.
       if (!this.destroyed) {
         try {
           peer.reconnect();
@@ -116,6 +135,7 @@ export class PeerConnection {
   private acceptGuest(conn: DataConnection): void {
     conn.on('open', () => {
       this.connections.set(conn.peer, conn);
+      this.watchIce(conn, conn.peer);
       this.events.emit('guest-connected', conn.peer);
     });
     conn.on('data', (data) => {
@@ -137,7 +157,10 @@ export class PeerConnection {
       serialization: 'json',
     });
     this.hostConn = conn;
+    this.watchIce(conn, 'host');
     conn.on('open', () => {
+      this.linked = true;
+      if (this.connectTimer) clearTimeout(this.connectTimer);
       this.connections.set('host', conn);
       this.events.emit('host-connected', undefined);
     });
@@ -153,27 +176,46 @@ export class PeerConnection {
     conn.on('error', () => this.events.emit('error', 'Lost connection to host.'));
   }
 
-  // ---- sending ----
+  /** Attach ICE diagnostics + fast-fail on ICE 'failed' to the underlying
+   *  RTCPeerConnection (available shortly after connect()/accept()). */
+  private watchIce(conn: DataConnection, label: string): void {
+    let tries = 0;
+    const attach = () => {
+      const rtc = (conn as unknown as { peerConnection?: RTCPeerConnection }).peerConnection;
+      if (!rtc) {
+        if (tries++ < 40 && !this.destroyed) setTimeout(attach, 250);
+        return;
+      }
+      rtc.oniceconnectionstatechange = () => {
+        const state = rtc.iceConnectionState;
+        console.debug(`[ice:${label}] ${state}`);
+        if (state === 'failed') {
+          this.events.emit('error', connectFailureMessage());
+        }
+      };
+    };
+    attach();
+  }
 
-  /** Host: send to a specific guest. */
+  // ---- sending ----
   sendTo(peerId: string, msg: HostMessage): void {
     this.connections.get(peerId)?.send(msg);
   }
 
-  /** Host: send to every connected guest. */
   broadcast(msg: HostMessage): void {
     for (const conn of this.connections.values()) {
       if (conn.open) conn.send(msg);
     }
   }
 
-  /** Guest: send to the host. */
   sendToHost(msg: GuestMessage): void {
     if (this.hostConn?.open) this.hostConn.send(msg);
   }
 
   destroy(): void {
     this.destroyed = true;
+    if (this.registerTimer) clearTimeout(this.registerTimer);
+    if (this.connectTimer) clearTimeout(this.connectTimer);
     this.events.clear();
     for (const conn of this.connections.values()) {
       try {
@@ -191,6 +233,12 @@ export class PeerConnection {
     }
     this.peer = null;
   }
+}
+
+function connectFailureMessage(): string {
+  return hasConfiguredTurn()
+    ? 'Could not connect to the other player. The TURN relay may be unreachable — check your TURN settings.'
+    : 'Could not connect across networks. This needs a TURN relay — the free public one is unreliable. See the README to add free TURN credentials.';
 }
 
 function mapPeerError(type: string, isHost: boolean): string {

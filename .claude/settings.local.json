@@ -13,7 +13,11 @@
       "Bash(node drive.mjs)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/favicon.ico)",
       "Bash(node drive2p.mjs)",
-      "Bash(pkill -f \"vite\")"
+      "Bash(pkill -f \"vite\")",
+      "Bash(nslookup openrelay.metered.ca)",
+      "Bash(nc -z -G 4 openrelay.metered.ca 443)",
+      "Bash(nc -z -G 4 openrelay.metered.ca 80)",
+      "WebSearch"
     ]
   }
 }
