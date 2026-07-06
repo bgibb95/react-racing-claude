@@ -92,6 +92,14 @@ export class Track extends Phaser.Scene {
     // Enable post-processing FX pipelines (bloom on lights, vignette for focus).
     // Pipeline string names are the FX_CONST numeric IDs: BLOOM=13, VIGNETTE=7.
     this.cameras.main.setPostPipeline(['13', '7']);
+    // Soften the vignette so it doesn't crush the edges of the frame.
+    const vignette = this.cameras.main.getPostPipeline('7') as
+      | Phaser.Renderer.WebGL.Pipelines.FX.VignetteFXPipeline
+      | undefined;
+    if (vignette) {
+      vignette.strength = 0.5;
+      vignette.radius = 0.75;
+    }
 
     if (this.localCar) {
       this.cameras.main.startFollow(this.localCar.sprite, true, 0.08, 0.08);
@@ -117,7 +125,9 @@ export class Track extends Phaser.Scene {
       this.scale.height / 640,
       1.1,
     );
-    this.baseZoom = Math.max(0.5, zoom);
+    // Bump zoom slightly on small (mobile) screens so the car reads bigger.
+    const isMobile = this.scale.width < 900;
+    this.baseZoom = Math.max(0.5, zoom) * (isMobile ? 1.15 : 1);
     this.cameras.main.setZoom(this.baseZoom);
   }
 
