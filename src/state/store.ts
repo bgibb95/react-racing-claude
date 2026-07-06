@@ -7,6 +7,7 @@ import type {
   Screen,
 } from '../types';
 import { CAR_COLORS, DEFAULT_LAPS } from '../types';
+import { getAudio } from '../game/audio/AudioManager';
 
 /** Low-frequency HUD data pushed from the Phaser scene (~10Hz), kept out of the
  *  per-frame render path so React only re-renders when these scalars change. */
@@ -73,6 +74,10 @@ interface GameStore {
   results: RaceResult[];
   setResults: (results: RaceResult[]) => void;
 
+  // ---- audio ----
+  muted: boolean;
+  setMuted: (muted: boolean) => void;
+
   // ---- reset everything back to the landing screen ----
   leave: () => void;
 }
@@ -129,6 +134,13 @@ export const useGameStore = create<GameStore>((set) => ({
 
   results: [],
   setResults: (results) => set({ results }),
+
+  muted: localStorage.getItem('apex-muted') === 'true',
+  setMuted: (muted) => {
+    localStorage.setItem('apex-muted', muted ? 'true' : 'false');
+    getAudio().setMuted(muted);
+    set({ muted });
+  },
 
   leave: () =>
     set({

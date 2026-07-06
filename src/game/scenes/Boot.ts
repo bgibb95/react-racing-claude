@@ -3,10 +3,16 @@
 // hands off to the Track scene.
 
 import Phaser from 'phaser';
+import { getAudio } from '../audio/AudioManager';
 
 export class Boot extends Phaser.Scene {
   constructor() {
     super('Boot');
+  }
+
+  preload(): void {
+    // Audio files live in public/audio/ and are served as-is by Vite.
+    getAudio().preload(this);
   }
 
   create(): void {

@@ -28,11 +28,39 @@ const SKID_SPEED_THRESHOLD = 220;
 const SKID_STEER_THRESHOLD = 0.5;
 const SKID_DEPOSIT_INTERVAL = 0.05; // seconds between skid deposits
 
+// Collision tuning.
+const BARRIER_RADIUS = 20; // px — collision distance to a barrier
+const CAR_COLLISION_RADIUS = 28; // px — collision distance between two cars
+const BARRIER_BOUNCE = -0.3; // velocity multiplier on barrier hit
+const CAR_BOUNCE_SPEED = 0.5; // speed multiplier on car-to-car hit
+const COLLISION_COOLDOWN_MS = 200; // dedupe window per car pair
+
 /** Shared scene-level graphics for persistent skid marks. */
 let skidGraphics: Phaser.GameObjects.Graphics | null = null;
 
 export function setSkidGraphics(g: Phaser.GameObjects.Graphics): void {
   skidGraphics = g;
+}
+
+/** Barrier positions collected from the track scenery for collision detection. */
+export interface Barrier {
+  x: number;
+  y: number;
+  angle: number;
+}
+
+let barriers: Barrier[] = [];
+
+export function setBarriers(b: Barrier[]): void {
+  barriers = b;
+}
+
+/** Callback fired when this car collides with a barrier or another car. */
+export type CollisionCallback = (kind: 'barrier' | 'car') => void;
+let collisionCallback: CollisionCallback | null = null;
+
+export function setCollisionCallback(cb: CollisionCallback | null): void {
+  collisionCallback = cb;
 }
 
 export class Car {
@@ -50,6 +78,8 @@ export class Car {
   finished = false;
   finishMs: number | null = null;
   ackSeq = 0;
+  /** True while the car is skidding (hard brake or hard steer at speed). */
+  isSkidding = false;
 
   readonly sprite: Phaser.GameObjects.Sprite;
   readonly label: Phaser.GameObjects.Text;
@@ -69,6 +99,8 @@ export class Car {
     right: false,
   };
   private skidAcc = 0;
+  /** Per-car-id timestamp of last collision (for dedupe). */
+  private collisionCooldown = new Map<string, number>();
 
   constructor(
     scene: Phaser.Scene,
@@ -208,6 +240,78 @@ export class Car {
 
     this.x += Math.cos(this.angle) * this.speed * dt;
     this.y += Math.sin(this.angle) * this.speed * dt;
+  }
+
+  /**
+   * Check and resolve collisions with barriers and other cars. Called after
+   * step() in the host/guest update loops. Emits a sound via collisionCallback
+   * when a new collision occurs (deduped per pair within COLLISION_COOLDOWN_MS).
+   */
+  checkCollisions(otherCars: Car[]): void {
+    const now = performance.now();
+
+    // Barrier collisions.
+    for (const b of barriers) {
+      const dx = this.x - b.x;
+      const dy = this.y - b.y;
+      const distSq = dx * dx + dy * dy;
+      if (distSq < BARRIER_RADIUS * BARRIER_RADIUS) {
+        const key = `barrier:${b.x},${b.y}`;
+        const last = this.collisionCooldown.get(key) ?? 0;
+        if (now - last < COLLISION_COOLDOWN_MS) continue;
+        this.collisionCooldown.set(key, now);
+
+        // Push car out of barrier along the collision normal.
+        const dist = Math.sqrt(distSq) || 1;
+        const nx = dx / dist;
+        const ny = dy / dist;
+        this.x = b.x + nx * BARRIER_RADIUS;
+        this.y = b.y + ny * BARRIER_RADIUS;
+
+        // Reflect velocity: reverse speed component along the normal.
+        const vDotN = Math.cos(this.angle) * nx + Math.sin(this.angle) * ny;
+        if (vDotN < 0) {
+          this.speed *= BARRIER_BOUNCE;
+        }
+        collisionCallback?.('barrier');
+      }
+    }
+
+    // Car-to-car collisions.
+    for (const other of otherCars) {
+      if (other === this) continue;
+      const dx = other.x - this.x;
+      const dy = other.y - this.y;
+      const distSq = dx * dx + dy * dy;
+      const minDist = CAR_COLLISION_RADIUS;
+      if (distSq < minDist * minDist) {
+        // Use sorted id pair as dedupe key so both cars don't double-trigger.
+        const key =
+          this.id < other.id
+            ? `car:${this.id}:${other.id}`
+            : `car:${other.id}:${this.id}`;
+        const last = this.collisionCooldown.get(key) ?? 0;
+        if (now - last < COLLISION_COOLDOWN_MS) continue;
+        this.collisionCooldown.set(key, now);
+
+        const dist = Math.sqrt(distSq) || 1;
+        const nx = dx / dist;
+        const ny = dy / dist;
+        const overlap = minDist - dist;
+
+        // Push both cars apart equally.
+        this.x -= nx * overlap * 0.5;
+        this.y -= ny * overlap * 0.5;
+        other.x += nx * overlap * 0.5;
+        other.y += ny * overlap * 0.5;
+
+        // Dampen speeds on impact.
+        this.speed *= CAR_BOUNCE_SPEED;
+        other.speed *= CAR_BOUNCE_SPEED;
+
+        collisionCallback?.('car');
+      }
+    }
   }
 
   updateProgress(totalLaps: number, raceTimeMs: number): boolean {
@@ -362,6 +466,7 @@ export class Car {
       (steerMag > 0 &&
         Math.abs(this.speed) > SKID_SPEED_THRESHOLD &&
         Math.abs(this.speed) > SKID_STEER_THRESHOLD * MAX_SPEED);
+    this.isSkidding = skidding;
     if (skidding && skidGraphics && isOnTrack(this.x, this.y)) {
       this.skidAcc += dt;
       if (this.skidAcc >= SKID_DEPOSIT_INTERVAL) {

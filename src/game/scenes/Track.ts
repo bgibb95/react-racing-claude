@@ -4,7 +4,13 @@
 // latest snapshot. HUD scalars are pushed to the Zustand store at ~10Hz.
 
 import Phaser from 'phaser';
-import { Car, setSkidGraphics } from '../entities/Car';
+import {
+  Car,
+  setBarriers,
+  setCollisionCallback,
+  setSkidGraphics,
+  type Barrier,
+} from '../entities/Car';
 import { getSession } from '../../net/session';
 import { touchInput } from '../input';
 import { useGameStore } from '../../state/store';
@@ -18,6 +24,7 @@ import {
   WORLD_HEIGHT,
   WORLD_WIDTH,
 } from '../track/circuit';
+import { getAudio } from '../audio/AudioManager';
 
 const NET_HZ = 30;
 const NET_INTERVAL = 1 / NET_HZ;
@@ -60,6 +67,11 @@ export class Track extends Phaser.Scene {
   private cameraShake = 0;
   private baseZoom = 1;
 
+  // Audio state.
+  private prevRaceStatus: 'lobby' | 'countdown' | 'racing' | 'finished' =
+    'lobby';
+  private prevLocalLap = 0;
+
   constructor() {
     super('Track');
   }
@@ -84,6 +96,12 @@ export class Track extends Phaser.Scene {
     skidLayer.setDepth(2);
     setSkidGraphics(skidLayer);
 
+    // Audio: instantiate sounds and wire collision callback.
+    const audio = getAudio();
+    audio.create(this);
+    audio.setMuted(store.muted);
+    setCollisionCallback(() => audio.playCrash());
+
     this.cursors = this.input.keyboard!.createCursorKeys();
     this.wasd = this.input.keyboard!.addKeys('W,A,S,D') as typeof this.wasd;
 
@@ -97,7 +115,7 @@ export class Track extends Phaser.Scene {
       | Phaser.Renderer.WebGL.Pipelines.FX.VignetteFXPipeline
       | undefined;
     if (vignette) {
-      vignette.strength = 0.5;
+      vignette.strength = 0.4;
       vignette.radius = 0.75;
     }
 
@@ -164,9 +182,12 @@ export class Track extends Phaser.Scene {
 
   update(_time: number, delta: number): void {
     const dt = Math.min(delta / 1000, 0.05);
-    const racing = useGameStore.getState().raceStatus === 'racing';
+    const store = useGameStore.getState();
+    const racing = store.raceStatus === 'racing';
     const input = this.readLocalInput();
     this.lastInput = input;
+
+    this.handleRaceStatusTransitions(store.raceStatus);
 
     if (this.isHost) {
       this.hostUpdate(dt, racing, input);
@@ -175,8 +196,34 @@ export class Track extends Phaser.Scene {
     }
 
     for (const car of this.cars) car.render(dt);
+    this.updateAudio();
     this.updateVisuals(dt);
     this.pushHud(dt);
+  }
+
+  /** Detect race status transitions and trigger audio accordingly. */
+  private handleRaceStatusTransitions(
+    status: 'lobby' | 'countdown' | 'racing' | 'finished',
+  ): void {
+    const audio = getAudio();
+    if (status === 'countdown' && this.prevRaceStatus !== 'countdown') {
+      // Schedule 3 low beeps + 1 high "GO" beep across the countdown duration.
+      audio.playCountdownSequence(3200);
+    } else if (status === 'racing' && this.prevRaceStatus !== 'racing') {
+      audio.playMusic();
+    } else if (status === 'finished' && this.prevRaceStatus !== 'finished') {
+      audio.stopMusic();
+      audio.playFinish();
+    }
+    this.prevRaceStatus = status;
+
+    // Local car lap completion chime.
+    if (this.localCar) {
+      if (this.localCar.lap > this.prevLocalLap) {
+        audio.playLap();
+      }
+      this.prevLocalLap = this.localCar.lap;
+    }
   }
 
   // ---- host ----
@@ -194,6 +241,7 @@ export class Track extends Phaser.Scene {
           ? localInput
           : (session?.getInput(car.id) ?? localInput);
         car.step(dt, inp);
+        car.checkCollisions(this.cars);
         car.updateProgress(this.totalLaps, raceTime);
         if (!car.isLocal && session) car.ackSeq = session.getInput(car.id).seq;
       }
@@ -228,6 +276,7 @@ export class Track extends Phaser.Scene {
 
     if (racing && this.localCar && !this.localCar.finished) {
       this.localCar.step(dt, localInput);
+      this.localCar.checkCollisions(this.cars);
     }
 
     const snaps = session.drainSnapshots();
@@ -311,6 +360,19 @@ export class Track extends Phaser.Scene {
         isLocal: c.isLocal,
       })),
     });
+  }
+
+  // ---- per-frame audio updates ----
+  private updateAudio(): void {
+    const audio = getAudio();
+    if (!this.localCar) return;
+    const speedFrac = Math.min(1, Math.abs(this.localCar.speed) / 560);
+    audio.updateEngine(speedFrac, this.lastInput.throttle);
+    if (this.localCar.isSkidding) {
+      audio.startScreech();
+    } else {
+      audio.stopScreech();
+    }
   }
 
   // ---- per-frame visual updates ----
@@ -570,6 +632,7 @@ export class Track extends Phaser.Scene {
     const n = CENTERLINE.length;
     const treeLayer = this.add.graphics();
     treeLayer.setDepth(0);
+    const barrierList: Barrier[] = [];
 
     for (let i = 0; i < n; i += 6) {
       const p = CENTERLINE[i];
@@ -596,6 +659,7 @@ export class Track extends Phaser.Scene {
         const barrier = this.add.image(bx, by, 'barrier');
         barrier.setDepth(1);
         barrier.setRotation(Math.atan2(dy, dx));
+        barrierList.push({ x: bx, y: by, angle: Math.atan2(dy, dx) });
       }
 
       // Occasional tire wall on sharp corners.
@@ -605,6 +669,7 @@ export class Track extends Phaser.Scene {
         const wall = this.add.image(wx, wy, 'tireWall');
         wall.setDepth(1);
         wall.setRotation(Math.atan2(dy, dx));
+        barrierList.push({ x: wx, y: wy, angle: Math.atan2(dy, dx) });
       }
 
       // Occasional billboard further out.
@@ -625,5 +690,8 @@ export class Track extends Phaser.Scene {
         gs.setRotation(Math.atan2(dy, dx));
       }
     }
+
+    // Register barrier positions for collision detection.
+    setBarriers(barrierList);
   }
 }
