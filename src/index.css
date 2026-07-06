@@ -1,0 +1,49 @@
+@import 'tailwindcss';
+
+/* ------------------------------------------------------------------ */
+/* Tailwind v4 CSS-first config: design tokens become utilities         */
+/* (e.g. --color-race-red  ->  bg-race-red / text-race-red / border-…). */
+/* Porsche-inspired palette: racing red, deep asphalt black, silver.    */
+/* ------------------------------------------------------------------ */
+@theme {
+  --color-race-red: #d5001c;
+  --color-race-red-dark: #9b0014;
+  --color-asphalt: #0a0a0b;
+  --color-asphalt-800: #16161a;
+  --color-asphalt-700: #222228;
+  --color-silver: #d4d7dd;
+  --color-silver-dim: #8b8f98;
+  --color-gold: #f0c419;
+  --color-track: #3a3a42;
+
+  --font-display: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
+
+  --shadow-glow-red: 0 0 24px -4px rgb(213 0 28 / 0.55);
+}
+
+/* Base reset — the few things Tailwind utilities can't own cleanly. */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--color-asphalt);
+  color: var(--color-silver);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The Phaser canvas fills its container; keep it crisp and centered. */
+#game-root canvas {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: 100%;
+  touch-action: none;
+}

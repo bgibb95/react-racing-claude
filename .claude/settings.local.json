@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:5173/)",
+      "Bash(curl -s http://localhost:5173/src/main.tsx)",
+      "Bash(curl -s -m 8 -o /dev/null -w \"HTTP %{http_code} in %{time_total}s\\\\n\" \"https://0.peerjs.com/peerjs/id?ts=1&version=1.5.4\")",
+      "Bash(npm init *)",
+      "Bash(npm i *)",
+      "Bash(node -e \"console.log\\('playwright-core ready:', !!require\\('playwright-core'\\).chromium\\)\")",
+      "Bash(node drive.mjs)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/favicon.ico)",
+      "Bash(node drive2p.mjs)",
+      "Bash(pkill -f \"vite\")"
+    ]
+  }
+}
