@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
 /* ------------------------------------------------------------------ */
@@ -19,6 +20,12 @@
   --font-display: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
 
   --shadow-glow-red: 0 0 24px -4px rgb(213 0 28 / 0.55);
+  --shadow-glow-gold: 0 0 24px -4px rgb(240 196 25 / 0.55);
+  --shadow-glow-green: 0 0 24px -4px rgb(79 209 139 / 0.55);
+
+  --animate-pulse-glow: pulse-glow 1.5s ease-in-out infinite;
+  --animate-slide-up: slide-up 0.4s ease-out;
+  --animate-fade-in: fade-in 0.3s ease-out;
 }
 
 /* Base reset — the few things Tailwind utilities can't own cleanly. */
@@ -33,6 +40,7 @@ body {
   background: var(--color-asphalt);
   color: var(--color-silver);
   font-family:
+    'Rajdhani',
     system-ui,
     -apple-system,
     'Segoe UI',
@@ -77,4 +85,39 @@ body {
 [data-key='left'][data-pressed='true'],
 [data-key='right'][data-pressed='true'] {
   box-shadow: 0 0 0 3px var(--color-silver);
+}
+
+/* ------------------------------------------------------------------ */
+/* Animation keyframes.                                                */
+/* ------------------------------------------------------------------ */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(213, 0, 28, 0.7));
+  }
+  50% {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 20px rgba(213, 0, 28, 1));
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

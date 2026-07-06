@@ -16,6 +16,17 @@ export interface HudState {
   position: number;
   playerCount: number;
   speed: number; // display units
+  rpm: number; // 0..1
+  throttle: boolean;
+  brake: boolean;
+  /** Snapshot of all car positions for the mini-map. */
+  carPositions: {
+    id: string;
+    x: number;
+    y: number;
+    colorId: string;
+    isLocal: boolean;
+  }[];
 }
 
 export type ConnectionStatus = 'idle' | 'connecting' | 'connected' | 'error';
@@ -38,7 +49,10 @@ interface GameStore {
   connectionStatus: ConnectionStatus;
   connectionError: string | null;
   setRoom: (opts: { isHost: boolean; roomCode: string }) => void;
-  setConnectionStatus: (status: ConnectionStatus, error?: string | null) => void;
+  setConnectionStatus: (
+    status: ConnectionStatus,
+    error?: string | null,
+  ) => void;
 
   // ---- lobby roster ----
   players: Player[];
@@ -100,7 +114,17 @@ export const useGameStore = create<GameStore>((set) => ({
   setRaceStatus: (raceStatus) => set({ raceStatus }),
   setCountdownMs: (countdownMs) => set({ countdownMs }),
 
-  hud: { lap: 0, totalLaps: DEFAULT_LAPS, position: 1, playerCount: 1, speed: 0 },
+  hud: {
+    lap: 0,
+    totalLaps: DEFAULT_LAPS,
+    position: 1,
+    playerCount: 1,
+    speed: 0,
+    rpm: 0,
+    throttle: false,
+    brake: false,
+    carPositions: [],
+  },
   setHud: (hud) => set((s) => ({ hud: { ...s.hud, ...hud } })),
 
   results: [],
@@ -117,6 +141,16 @@ export const useGameStore = create<GameStore>((set) => ({
       raceStatus: 'lobby',
       countdownMs: 0,
       results: [],
-      hud: { lap: 0, totalLaps: DEFAULT_LAPS, position: 1, playerCount: 1, speed: 0 },
+      hud: {
+        lap: 0,
+        totalLaps: DEFAULT_LAPS,
+        position: 1,
+        playerCount: 1,
+        speed: 0,
+        rpm: 0,
+        throttle: false,
+        brake: false,
+        carPositions: [],
+      },
     }),
 }));
