@@ -17,7 +17,13 @@
       "Bash(nslookup openrelay.metered.ca)",
       "Bash(nc -z -G 4 openrelay.metered.ca 443)",
       "Bash(nc -z -G 4 openrelay.metered.ca 80)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(gh pr create --title '💄 UI: Add gradient and carbon-fiber texture to menu background' --body ' *)",
+      "Bash(brew list *)"
     ]
   }
 }
