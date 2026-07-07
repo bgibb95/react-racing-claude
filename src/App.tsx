@@ -8,7 +8,7 @@ export function App() {
   const screen = useGameStore((s) => s.screen);
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-asphalt text-silver">
+    <div className="bg-menu relative h-full w-full overflow-hidden text-silver">
       {screen === 'landing' && <Landing />}
       {screen === 'lobby' && <Lobby />}
       {screen === 'racing' && <RaceScreen />}
