@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, type ReactElement } from 'react';
 
 // Enhanced confetti with varied shapes, sizes, and natural falling motion
 const COLORS = [
@@ -14,7 +14,7 @@ const COLORS = [
   '#ff58c4', // pink
 ];
 
-const SHAPES = ['square', 'circle', 'triangle'];
+const SHAPES = ['square', 'circle', 'triangle'] as const;
 
 // Random utility functions
 const random = (min: number, max: number) => Math.random() * (max - min) + min;
@@ -29,7 +29,7 @@ interface ConfettiPiece {
   rotation: number;
   rotationSpeed: number;
   opacity: number;
-  shape: 'square' | 'circle' | 'triangle';
+  shape: typeof SHAPES[number];
   size: number;
   color: string;
   delay: number;
@@ -40,7 +40,7 @@ const generateId = () => `confetti-${++_idCounter}`;
 
 export default function Confetti() {
   const [pieces, setPieces] = useState<ConfettiPiece[]>([]);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | null>(null);
 
   // Inject global keyframes once
   useEffect(() => {
@@ -115,7 +115,7 @@ export default function Confetti() {
 
   const createPiece = (): ConfettiPiece => {
     const size = random(4, 12);
-    const shape = SHAPES[randomInt(0, SHAPES.length)];
+      const shape = SHAPES[randomInt(0, SHAPES.length)] as typeof SHAPES[number];
     return {
       id: generateId(),
       x: random(0, window.innerWidth),
@@ -133,10 +133,10 @@ export default function Confetti() {
   };
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden pointer-events-none">
+    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
       {pieces.map(piece => {
         const transform = `translate(${piece.x}px, ${piece.y}px) rotate(${piece.rotation}deg)`;
-        let shapeElement: JSX.Element;
+        let shapeElement: ReactElement;
         
         switch (piece.shape) {
           case 'circle':
