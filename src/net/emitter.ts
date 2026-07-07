@@ -5,7 +5,10 @@ type Handler<T> = (payload: T) => void;
 export class Emitter<Events extends Record<string, unknown>> {
   private handlers: { [K in keyof Events]?: Set<Handler<Events[K]>> } = {};
 
-  on<K extends keyof Events>(event: K, handler: Handler<Events[K]>): () => void {
+  on<K extends keyof Events>(
+    event: K,
+    handler: Handler<Events[K]>,
+  ): () => void {
     (this.handlers[event] ??= new Set()).add(handler);
     return () => this.off(event, handler);
   }

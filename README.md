@@ -45,8 +45,8 @@ unreliable in 2026**, so if a join hangs and then errors with "Could not connect
 across networks", set up your own free TURN — it takes ~2 minutes:
 
 **Option A — REST endpoint (easiest).** Create a free app on
-[Metered](https://dashboard.metered.ca) (50 GB/mo free), copy your *TURN
-Credentials API* URL, and set:
+[Metered](https://dashboard.metered.ca) (50 GB/mo free), copy your _TURN
+Credentials API_ URL, and set:
 
 ```
 # .env

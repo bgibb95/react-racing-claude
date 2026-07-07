@@ -19,7 +19,12 @@ export interface CarColor {
 export const CAR_COLORS: CarColor[] = [
   { id: 'guards-red', name: 'Guards Red', value: 0xd5001c, css: '#d5001c' },
   { id: 'gt-silver', name: 'GT Silver', value: 0xc7ccd3, css: '#c7ccd3' },
-  { id: 'racing-yellow', name: 'Racing Yellow', value: 0xf5c518, css: '#f5c518' },
+  {
+    id: 'racing-yellow',
+    name: 'Racing Yellow',
+    value: 0xf5c518,
+    css: '#f5c518',
+  },
   { id: 'gulf-blue', name: 'Gulf Blue', value: 0x3fa9d6, css: '#3fa9d6' },
   { id: 'jet-black', name: 'Jet Black', value: 0x2b2b30, css: '#2b2b30' },
   { id: 'mint-green', name: 'Mint Green', value: 0x4fd18b, css: '#4fd18b' },

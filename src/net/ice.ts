@@ -33,14 +33,21 @@ const OPEN_RELAY_FALLBACK: RTCIceServer[] = [
 
 function parseUrls(raw: string | undefined): string[] {
   if (!raw) return [];
-  return raw.split(',').map((s) => s.trim()).filter(Boolean);
+  return raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 /** Normalize a REST response into an RTCIceServer[]. Providers return either a
  *  bare array or an object with an `iceServers` field. */
 function coerceIceServers(data: unknown): RTCIceServer[] | null {
   if (Array.isArray(data)) return data as RTCIceServer[];
-  if (data && typeof data === 'object' && Array.isArray((data as any).iceServers)) {
+  if (
+    data &&
+    typeof data === 'object' &&
+    Array.isArray((data as any).iceServers)
+  ) {
     return (data as any).iceServers as RTCIceServer[];
   }
   return null;
@@ -97,9 +104,9 @@ export async function loadIceServers(): Promise<RTCIceServer[]> {
 export function hasConfiguredTurn(): boolean {
   return Boolean(
     import.meta.env.VITE_TURN_API_URL ||
-      (import.meta.env.VITE_TURN_URLS &&
-        import.meta.env.VITE_TURN_USERNAME &&
-        import.meta.env.VITE_TURN_CREDENTIAL),
+    (import.meta.env.VITE_TURN_URLS &&
+      import.meta.env.VITE_TURN_USERNAME &&
+      import.meta.env.VITE_TURN_CREDENTIAL),
   );
 }
 
