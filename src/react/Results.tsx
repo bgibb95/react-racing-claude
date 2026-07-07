@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import Confetti from './Confetti';
 import { useGameStore } from '../state/store';
 import { leaveRoom, startRace } from '../net/controller';
 import { CAR_COLORS } from '../types';
@@ -34,6 +35,7 @@ export function Results() {
 
   return (
     <div className="flex h-full w-full items-center justify-center overflow-y-auto p-4">
+      <Confetti />
       <div className="w-full max-w-md">
         <h1 className="mb-1 text-center text-4xl font-black text-silver">
           Race <span className="text-race-red">Results</span>
