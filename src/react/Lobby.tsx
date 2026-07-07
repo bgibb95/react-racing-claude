@@ -95,7 +95,9 @@ export function Lobby() {
 
         {isHost && (
           <div className="mt-5 flex items-center justify-center gap-2">
-            <span className="text-xs uppercase tracking-wider text-silver-dim">Laps</span>
+            <span className="text-xs uppercase tracking-wider text-silver-dim">
+              Laps
+            </span>
             {LAP_OPTIONS.map((n) => (
               <button
                 key={n}
@@ -135,7 +137,7 @@ export function Lobby() {
                   : 'bg-race-red text-white hover:bg-race-red-dark'
               }`}
             >
-              {localReady ? "Ready — waiting for host" : "I'm Ready"}
+              {localReady ? 'Ready — waiting for host' : "I'm Ready"}
             </button>
           )}
         </div>

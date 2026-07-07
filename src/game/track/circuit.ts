@@ -66,10 +66,15 @@ export const CENTERLINE: Vec[] = buildCenterline();
 /** Number of ordered checkpoints (index 0 == start/finish line). */
 export const CHECKPOINT_COUNT = 12;
 
-export const CHECKPOINTS: Vec[] = Array.from({ length: CHECKPOINT_COUNT }, (_, i) => {
-  const idx = Math.round((i / CHECKPOINT_COUNT) * CENTERLINE.length) % CENTERLINE.length;
-  return CENTERLINE[idx];
-});
+export const CHECKPOINTS: Vec[] = Array.from(
+  { length: CHECKPOINT_COUNT },
+  (_, i) => {
+    const idx =
+      Math.round((i / CHECKPOINT_COUNT) * CENTERLINE.length) %
+      CENTERLINE.length;
+    return CENTERLINE[idx];
+  },
+);
 
 /** Heading (radians) of the track at a given centerline index. */
 function headingAt(index: number): number {

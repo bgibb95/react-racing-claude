@@ -99,10 +99,12 @@ export class GameSync implements SceneSession {
     // End condition: everyone still connected has finished, or grace expired.
     const activeIds = new Set(this.players.map((p) => p.id));
     const activeCars = cars.filter((c) => activeIds.has(c.id));
-    const allDone = activeCars.length > 0 && activeCars.every((c) => c.finished);
+    const allDone =
+      activeCars.length > 0 && activeCars.every((c) => c.finished);
     if (
       this.status === 'racing' &&
-      (allDone || (this.finishDeadline !== null && this.now() >= this.finishDeadline))
+      (allDone ||
+        (this.finishDeadline !== null && this.now() >= this.finishDeadline))
     ) {
       this.endRace();
     }
@@ -132,7 +134,11 @@ export class GameSync implements SceneSession {
 
     this.setStatus('countdown');
     useGameStore.getState().setScreen('racing');
-    this.broadcast({ t: 'race', status: 'countdown', totalLaps: this.totalLaps });
+    this.broadcast({
+      t: 'race',
+      status: 'countdown',
+      totalLaps: this.totalLaps,
+    });
     this.runCountdownDisplay(() => this.beginRacing());
   }
 
@@ -169,8 +175,8 @@ export class GameSync implements SceneSession {
     const ranked = [...this.players].sort((a, b) => {
       const ca = byId.get(a.id);
       const cb = byId.get(b.id);
-      const fa = ca?.finished ? ca.finishMs ?? Infinity : Infinity;
-      const fb = cb?.finished ? cb.finishMs ?? Infinity : Infinity;
+      const fa = ca?.finished ? (ca.finishMs ?? Infinity) : Infinity;
+      const fb = cb?.finished ? (cb.finishMs ?? Infinity) : Infinity;
       if (fa !== fb) return fa - fb;
       // Both unfinished: rank by progress (laps then checkpoint).
       const pa = (ca?.lap ?? 0) * 1000 + (ca?.checkpoint ?? 0);
@@ -354,7 +360,10 @@ export class GameSync implements SceneSession {
           store.setPlayers([...this.players]);
           store.setConnectionStatus('connected');
           store.setScreen('lobby');
-          store.setHud({ totalLaps: m.totalLaps, playerCount: this.players.length });
+          store.setHud({
+            totalLaps: m.totalLaps,
+            playerCount: this.players.length,
+          });
           break;
         case 'roster':
           this.players = m.players;
@@ -381,7 +390,8 @@ export class GameSync implements SceneSession {
         case 'snap':
           this.snapshotQueue.push(m.snapshot);
           if (this.snapshotQueue.length > 8) this.snapshotQueue.shift();
-          if (m.snapshot.status !== this.status) this.setStatus(m.snapshot.status);
+          if (m.snapshot.status !== this.status)
+            this.setStatus(m.snapshot.status);
           break;
         case 'results':
           this.clearCountdown();

@@ -29,7 +29,7 @@ interface ConfettiPiece {
   rotation: number;
   rotationSpeed: number;
   opacity: number;
-  shape: typeof SHAPES[number];
+  shape: (typeof SHAPES)[number];
   size: number;
   color: string;
   delay: number;
@@ -65,7 +65,7 @@ export default function Confetti() {
       for (let i = 0; i < count; i++) {
         newPieces.push(createPiece());
       }
-      setPieces(prev => [...prev, ...newPieces]);
+      setPieces((prev) => [...prev, ...newPieces]);
     };
 
     createBurst(80); // Initial burst
@@ -76,46 +76,49 @@ export default function Confetti() {
     }, 500);
 
     // Animation loop
-        const animate = () => {
-          setPieces(prev => {
-            return prev
-              .map(piece => {
-                // Apply physics
-                const updated = { ...piece };
-                updated.x += updated.xSpeed;
-                updated.y += updated.ySpeed;
-                updated.ySpeed += 0.25; // gravity
-                updated.rotation += updated.rotationSpeed;
-                updated.opacity = Math.max(0, 1 - (updated.y / window.innerHeight));
-            
-                // Remove if off screen
-                if (
-                  updated.y > window.innerHeight + 100 ||
-                  updated.x < -100 ||
-                  updated.x > window.innerWidth + 100
-                ) {
-                  return null;
-                }
-                return updated;
-              })
-              .filter((p): p is ConfettiPiece => p !== null);
-          });
+    const animate = () => {
+      setPieces((prev) => {
+        return prev
+          .map((piece) => {
+            // Apply physics
+            const updated = { ...piece };
+            updated.x += updated.xSpeed;
+            updated.y += updated.ySpeed;
+            updated.ySpeed += 0.25; // gravity
+            updated.rotation += updated.rotationSpeed;
+            updated.opacity = Math.max(0, 1 - updated.y / window.innerHeight);
 
-          animationFrameRef.current = requestAnimationFrame(animate);
-        };
+            // Remove if off screen
+            if (
+              updated.y > window.innerHeight + 100 ||
+              updated.x < -100 ||
+              updated.x > window.innerWidth + 100
+            ) {
+              return null;
+            }
+            return updated;
+          })
+          .filter((p): p is ConfettiPiece => p !== null);
+      });
+
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
 
     animationFrameRef.current = requestAnimationFrame(animate);
 
     // Cleanup
     return () => {
       clearInterval(spawnInterval);
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (animationFrameRef.current)
+        cancelAnimationFrame(animationFrameRef.current);
     };
   }, []);
 
   const createPiece = (): ConfettiPiece => {
     const size = random(4, 12);
-      const shape = SHAPES[randomInt(0, SHAPES.length)] as typeof SHAPES[number];
+    const shape = SHAPES[
+      randomInt(0, SHAPES.length)
+    ] as (typeof SHAPES)[number];
     return {
       id: generateId(),
       x: random(0, window.innerWidth),
@@ -134,10 +137,10 @@ export default function Confetti() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
-      {pieces.map(piece => {
+      {pieces.map((piece) => {
         const transform = `translate(${piece.x}px, ${piece.y}px) rotate(${piece.rotation}deg)`;
         let shapeElement: ReactElement;
-        
+
         switch (piece.shape) {
           case 'circle':
             shapeElement = <div className="confetti-circle" />;
@@ -148,7 +151,7 @@ export default function Confetti() {
           default: // square
             shapeElement = <div className="confetti-square" />;
         }
-        
+
         return (
           <div
             key={piece.id}
@@ -170,7 +173,7 @@ export default function Confetti() {
           </div>
         );
       })}
-      
+
       {/* Styles for different shapes */}
       <style>
         {`

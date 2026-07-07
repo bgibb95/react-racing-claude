@@ -21,7 +21,10 @@ interface Profile {
   colorId: string;
 }
 
-export function hostRoom({ name, colorId }: Profile, totalLaps = DEFAULT_LAPS): string {
+export function hostRoom(
+  { name, colorId }: Profile,
+  totalLaps = DEFAULT_LAPS,
+): string {
   const gen = beginSession();
   const store = useGameStore.getState();
   store.setProfile(name, colorId);
@@ -66,7 +69,11 @@ function beginSession(): number {
   return ++generation;
 }
 
-function attach(pc: PeerConnection, gen: number, opts: { totalLaps: number }): void {
+function attach(
+  pc: PeerConnection,
+  gen: number,
+  opts: { totalLaps: number },
+): void {
   // The user left (or started another session) before this resolved.
   if (gen !== generation) {
     pc.destroy();
@@ -79,7 +86,10 @@ function attach(pc: PeerConnection, gen: number, opts: { totalLaps: number }): v
 function onSetupError(err: unknown): void {
   useGameStore
     .getState()
-    .setConnectionStatus('error', err instanceof Error ? err.message : 'Failed to start networking.');
+    .setConnectionStatus(
+      'error',
+      err instanceof Error ? err.message : 'Failed to start networking.',
+    );
 }
 
 function teardown(): void {

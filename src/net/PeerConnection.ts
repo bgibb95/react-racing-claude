@@ -95,7 +95,8 @@ export class PeerConnection {
     pc.wireCommonPeerEvents();
     // Guard: if the p2p link never opens, surface an actionable error.
     pc.connectTimer = setTimeout(() => {
-      if (!pc.linked && !pc.destroyed) pc.events.emit('error', connectFailureMessage());
+      if (!pc.linked && !pc.destroyed)
+        pc.events.emit('error', connectFailureMessage());
     }, CONNECT_TIMEOUT_MS);
     pc.peer.on('open', () => pc.connectToHost(peerIdForRoom(roomCode)));
     return pc;
@@ -106,7 +107,10 @@ export class PeerConnection {
     // Guard: broker registration must complete.
     this.registerTimer = setTimeout(() => {
       if (!this.opened && !this.destroyed) {
-        this.events.emit('error', 'Could not reach the signalling server. Check your connection and try again.');
+        this.events.emit(
+          'error',
+          'Could not reach the signalling server. Check your connection and try again.',
+        );
       }
     }, REGISTER_TIMEOUT_MS);
 
@@ -173,7 +177,9 @@ export class PeerConnection {
       }
     };
     conn.on('close', drop);
-    conn.on('error', () => this.events.emit('error', 'Lost connection to host.'));
+    conn.on('error', () =>
+      this.events.emit('error', 'Lost connection to host.'),
+    );
   }
 
   /** Attach ICE diagnostics + fast-fail on ICE 'failed' to the underlying
@@ -181,7 +187,8 @@ export class PeerConnection {
   private watchIce(conn: DataConnection, label: string): void {
     let tries = 0;
     const attach = () => {
-      const rtc = (conn as unknown as { peerConnection?: RTCPeerConnection }).peerConnection;
+      const rtc = (conn as unknown as { peerConnection?: RTCPeerConnection })
+        .peerConnection;
       if (!rtc) {
         if (tries++ < 40 && !this.destroyed) setTimeout(attach, 250);
         return;

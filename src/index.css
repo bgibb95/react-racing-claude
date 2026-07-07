@@ -39,11 +39,8 @@ body,
 body {
   background: var(--color-asphalt);
   color: var(--color-silver);
-  background: radial-gradient(
-      ellipse at 50% -10%,
-      rgb(213 0 28 / 0.08),
-      transparent 55%
-    ),
+  background:
+    radial-gradient(ellipse at 50% -10%, rgb(213 0 28 / 0.08), transparent 55%),
     linear-gradient(
       160deg,
       var(--color-asphalt-700) 0%,
