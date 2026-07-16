@@ -3,6 +3,7 @@ import { useGameStore } from '../state/store';
 import { hostRoom, joinRoom, leaveRoom } from '../net/controller';
 import { hasConfiguredTurn } from '../net/ice';
 import { CAR_COLORS, ROOM_CODE_LENGTH } from '../types';
+import { FullscreenButton } from './FullscreenButton';
 
 export function Landing() {
   const {
@@ -56,51 +57,57 @@ export function Landing() {
   return (
     <div className="flex h-full w-full items-center justify-center overflow-y-auto p-4">
       <div className="w-full max-w-md">
-        <header className="relative mb-8 text-center">
-          <h1 className="text-5xl font-black tracking-tight text-silver sm:text-6xl">
-            APEX <span className="text-race-red">RIVALS</span>
-          </h1>
-          <p className="mt-2 text-sm text-silver-dim">
-            Porsche-inspired real-time racing · play with friends anywhere
-          </p>
-          {/* Mute toggle */}
-          <button
-            onClick={() => setMuted(!muted)}
-            className="pointer-events-auto absolute -top-2 right-0 rounded-lg border border-asphalt-700 bg-asphalt-800/80 p-2 text-silver-dim hover:text-silver transition"
-            title={muted ? 'Unmute' : 'Mute'}
-          >
-            {muted ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="h-5 w-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M17.25 9.75 19.5 12m0 0 2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6 4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"
-                />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="h-5 w-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"
-                />
-              </svg>
-            )}
-          </button>
+        <header className="mb-8">
+          <div className="flex items-center justify-end gap-2 pb-2">
+            {/* Mute toggle */}
+            <button
+              onClick={() => setMuted(!muted)}
+              className="rounded-lg border border-asphalt-700 bg-asphalt-800/80 p-2 text-silver-dim hover:text-silver transition"
+              title={muted ? 'Unmute' : 'Mute'}
+            >
+              {muted ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="h-5 w-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17.25 9.75 19.5 12m0 0 2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6 4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="h-5 w-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"
+                  />
+                </svg>
+              )}
+            </button>
+            {/* Fullscreen toggle */}
+            <FullscreenButton className="rounded-lg border border-asphalt-700 bg-asphalt-800/80 p-2 text-silver-dim hover:text-silver transition" />
+          </div>
+          <div className="text-center">
+            <h1 className="text-5xl font-black tracking-tight text-silver sm:text-6xl">
+              APEX <span className="text-race-red">RIVALS</span>
+            </h1>
+            <p className="mt-2 text-sm text-silver-dim">
+              Porsche-inspired real-time racing · play with friends anywhere
+            </p>
+          </div>
         </header>
 
         <div className="rounded-2xl border border-asphalt-700 bg-asphalt-800/80 p-6 shadow-glow-red backdrop-blur">

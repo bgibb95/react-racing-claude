@@ -2,6 +2,7 @@ import { useGameStore } from '../state/store';
 import { leaveRoom } from '../net/controller';
 import { CAR_COLORS } from '../types';
 import { CENTERLINE, WORLD_HEIGHT, WORLD_WIDTH } from '../game/track/circuit';
+import { FullscreenButton } from './FullscreenButton';
 
 function colorCss(colorId: string): string {
   return CAR_COLORS.find((c) => c.id === colorId)?.css ?? '#fff';
@@ -170,6 +171,9 @@ export function HUD() {
         </div>
       )}
 
+      {/* Fullscreen button (mobile) */}
+      <FullscreenButton className="pointer-events-auto absolute bottom-36 right-3 rounded-lg border border-asphalt-700 bg-asphalt/70 p-2 text-silver-dim backdrop-blur transition hover:text-silver sm:hidden" />
+
       {/* Mute button */}
       <button
         onClick={() => setMuted(!muted)}
@@ -259,6 +263,8 @@ export function HUD() {
       >
         Leave race
       </button>
+      {/* Fullscreen button (desktop) */}
+      <FullscreenButton className="pointer-events-auto absolute right-4 top-48 hidden rounded-lg border border-asphalt-700 bg-asphalt/70 p-2 text-silver-dim backdrop-blur transition hover:text-silver sm:block" />
     </div>
   );
 }
