@@ -325,7 +325,10 @@ export class Track extends Phaser.Scene {
     return {
       seq: ++this.inputSeq,
       throttle:
-        c.up.isDown || k.W.isDown || touchInput.throttle || gamepadInput.throttle,
+        c.up.isDown ||
+        k.W.isDown ||
+        touchInput.throttle ||
+        gamepadInput.throttle,
       brake:
         c.down.isDown || k.S.isDown || touchInput.brake || gamepadInput.brake,
       left: c.left.isDown || k.A.isDown || touchInput.left || gamepadInput.left,
