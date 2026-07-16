@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { resetTouchInput, setTouchInput, type RawInput } from '../game/input';
+import { useGameStore } from '../state/store';
 
 type Key = keyof RawInput;
 
@@ -37,6 +38,7 @@ const base =
 export function TouchControls() {
   const [show, setShow] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const gamepadConnected = useGameStore((s) => s.gamepadConnected);
 
   useEffect(() => {
     const coarse =
@@ -45,6 +47,13 @@ export function TouchControls() {
     setShow(coarse);
     return () => resetTouchInput();
   }, []);
+
+  // Hide touch controls while a gamepad is connected, and clear any stuck
+  // touch state so the car doesn't keep accelerating after the buttons
+  // disappear.
+  useEffect(() => {
+    if (gamepadConnected) resetTouchInput();
+  }, [gamepadConnected]);
 
   // Prevent the page from scrolling/zooming when a finger drags across a
   // button. Non-passive listener is required to call preventDefault.
@@ -64,7 +73,7 @@ export function TouchControls() {
   const gas = useTouchKey('throttle');
   const brake = useTouchKey('brake');
 
-  if (!show) return null;
+  if (!show || gamepadConnected) return null;
 
   return (
     <div

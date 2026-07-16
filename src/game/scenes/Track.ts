@@ -13,6 +13,7 @@ import {
 } from '../entities/Car';
 import { getSession } from '../../net/session';
 import { touchInput } from '../input';
+import { gamepadInput } from '../gamepad';
 import { useGameStore } from '../../state/store';
 import { CAR_COLORS, type CarState, type InputFrame } from '../../types';
 import {
@@ -323,10 +324,16 @@ export class Track extends Phaser.Scene {
     const k = this.wasd;
     return {
       seq: ++this.inputSeq,
-      throttle: c.up.isDown || k.W.isDown || touchInput.throttle,
-      brake: c.down.isDown || k.S.isDown || touchInput.brake,
-      left: c.left.isDown || k.A.isDown || touchInput.left,
-      right: c.right.isDown || k.D.isDown || touchInput.right,
+      throttle:
+        c.up.isDown ||
+        k.W.isDown ||
+        touchInput.throttle ||
+        gamepadInput.throttle,
+      brake:
+        c.down.isDown || k.S.isDown || touchInput.brake || gamepadInput.brake,
+      left: c.left.isDown || k.A.isDown || touchInput.left || gamepadInput.left,
+      right:
+        c.right.isDown || k.D.isDown || touchInput.right || gamepadInput.right,
     };
   }
 

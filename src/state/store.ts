@@ -79,6 +79,10 @@ interface GameStore {
   muted: boolean;
   setMuted: (muted: boolean) => void;
 
+  // ---- gamepad ----
+  gamepadConnected: boolean;
+  setGamepadConnected: (connected: boolean) => void;
+
   // ---- reset everything back to the landing screen ----
   leave: () => void;
 }
@@ -143,6 +147,9 @@ export const useGameStore = create<GameStore>((set) => ({
     getVibration().setMuted(muted);
     set({ muted });
   },
+
+  gamepadConnected: false,
+  setGamepadConnected: (gamepadConnected) => set({ gamepadConnected }),
 
   leave: () =>
     set({

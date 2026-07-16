@@ -9,7 +9,8 @@ function colorCss(colorId: string): string {
 }
 
 export function HUD() {
-  const { hud, raceStatus, countdownMs, muted, setMuted } = useGameStore();
+  const { hud, raceStatus, countdownMs, muted, setMuted, gamepadConnected } =
+    useGameStore();
 
   const countdownNumber = Math.ceil(countdownMs / 1000);
   const lightsLit = countdownNumber > 0 ? 4 - countdownNumber : 3;
@@ -212,9 +213,34 @@ export function HUD() {
           </svg>
         )}
       </button>
+      {/* Gamepad indicator (desktop only) — shows when a controller is connected. */}
+      {gamepadConnected && (
+        <div
+          className="pointer-events-none absolute right-4 top-36 hidden items-center gap-1.5 rounded-lg border border-[#4fd18b]/40 bg-asphalt/70 px-2.5 py-1.5 text-xs text-[#4fd18b] backdrop-blur sm:flex"
+          title="Gamepad connected"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="h-4 w-4"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 12h.01M18 12h.01M6.75 7.5l-.75 9M17.25 7.5l.75 9M3 9.75v4.5A2.25 2.25 0 0 0 5.25 16.5h13.5A2.25 2.25 0 0 0 21 14.25v-4.5A2.25 2.25 0 0 0 18.75 7.5H5.25A2.25 2.25 0 0 0 3 9.75Z"
+            />
+          </svg>
+          <span className="font-bold uppercase tracking-wider">Pad</span>
+        </div>
+      )}
       <button
         onClick={() => setMuted(!muted)}
-        className="pointer-events-auto absolute right-4 top-36 hidden rounded-lg border border-asphalt-700 bg-asphalt/70 p-2 text-silver-dim backdrop-blur transition hover:text-silver sm:block"
+        className={`pointer-events-auto absolute right-4 hidden rounded-lg border border-asphalt-700 bg-asphalt/70 p-2 text-silver-dim backdrop-blur transition hover:text-silver sm:block ${
+          gamepadConnected ? 'top-48' : 'top-36'
+        }`}
         title={muted ? 'Unmute' : 'Mute'}
       >
         {muted ? (
