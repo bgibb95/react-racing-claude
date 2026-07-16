@@ -3,6 +3,7 @@ import { useGameStore } from '../state/store';
 import { hostRoom, joinRoom, leaveRoom } from '../net/controller';
 import { hasConfiguredTurn } from '../net/ice';
 import { CAR_COLORS, ROOM_CODE_LENGTH } from '../types';
+import { FullscreenButton } from './FullscreenButton';
 
 export function Landing() {
   const {
@@ -66,7 +67,7 @@ export function Landing() {
           {/* Mute toggle */}
           <button
             onClick={() => setMuted(!muted)}
-            className="pointer-events-auto absolute -top-2 right-0 rounded-lg border border-asphalt-700 bg-asphalt-800/80 p-2 text-silver-dim hover:text-silver transition"
+            className="pointer-events-auto absolute -top-2 right-12 rounded-lg border border-asphalt-700 bg-asphalt-800/80 p-2 text-silver-dim hover:text-silver transition"
             title={muted ? 'Unmute' : 'Mute'}
           >
             {muted ? (
@@ -101,6 +102,8 @@ export function Landing() {
               </svg>
             )}
           </button>
+          {/* Fullscreen toggle */}
+          <FullscreenButton className="pointer-events-auto absolute -top-2 right-0 rounded-lg border border-asphalt-700 bg-asphalt-800/80 p-2 text-silver-dim hover:text-silver transition" />
         </header>
 
         <div className="rounded-2xl border border-asphalt-700 bg-asphalt-800/80 p-6 shadow-glow-red backdrop-blur">
