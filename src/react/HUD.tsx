@@ -171,103 +171,100 @@ export function HUD() {
         </div>
       )}
 
-      {/* Menu buttons — mobile (row above touch controls) */}
-      <div className="pointer-events-auto absolute inset-x-0 bottom-20 flex items-center justify-between gap-2 px-3 sm:hidden">
-        <button
-          onClick={() => leaveRoom()}
-          className="rounded-lg border border-asphalt-700 bg-asphalt/70 px-4 py-1.5 text-xs text-silver-dim backdrop-blur transition hover:text-silver"
-        >
-          Leave
-        </button>
-        <div className="flex items-center gap-2">
-          <FullscreenButton className="rounded-lg border border-asphalt-700 bg-asphalt/70 p-2 text-silver-dim backdrop-blur transition hover:text-silver" />
-          <button
-            onClick={() => setMuted(!muted)}
-            className="rounded-lg border border-asphalt-700 bg-asphalt/70 p-2 text-silver-dim backdrop-blur transition hover:text-silver"
-            title={muted ? 'Unmute' : 'Mute'}
-          >
-            {muted ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="h-4 w-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M17.25 9.75 19.5 12m0 0 2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6 4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"
-                />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="h-4 w-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"
-                />
-              </svg>
-            )}
-          </button>
-        </div>
-      </div>
+      {/* Fullscreen button (mobile) */}
+      <FullscreenButton className="pointer-events-auto absolute bottom-36 right-3 rounded-lg border border-asphalt-700 bg-asphalt/70 p-2 text-silver-dim backdrop-blur transition hover:text-silver sm:hidden" />
 
-      {/* Menu buttons — desktop (right column) */}
-      <div className="pointer-events-auto absolute right-4 top-24 hidden flex-col items-end gap-2 sm:flex">
-        <button
-          onClick={() => leaveRoom()}
-          className="rounded-lg border border-asphalt-700 bg-asphalt/70 px-3 py-1.5 text-xs text-silver-dim backdrop-blur transition hover:text-silver"
-        >
-          Leave race
-        </button>
-        <button
-          onClick={() => setMuted(!muted)}
-          className="rounded-lg border border-asphalt-700 bg-asphalt/70 p-2 text-silver-dim backdrop-blur transition hover:text-silver"
-          title={muted ? 'Unmute' : 'Mute'}
-        >
-          {muted ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-              className="h-5 w-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M17.25 9.75 19.5 12m0 0 2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6 4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"
-              />
-            </svg>
-          ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-              className="h-5 w-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"
-              />
-            </svg>
-          )}
-        </button>
-        <FullscreenButton className="rounded-lg border border-asphalt-700 bg-asphalt/70 p-2 text-silver-dim backdrop-blur transition hover:text-silver" />
-      </div>
+      {/* Mute button */}
+      <button
+        onClick={() => setMuted(!muted)}
+        className="pointer-events-auto absolute bottom-24 md:bottom-3 right-3 rounded-lg border border-asphalt-700 bg-asphalt/70 p-2 text-silver-dim backdrop-blur transition hover:text-silver sm:hidden"
+        title={muted ? 'Unmute' : 'Mute'}
+      >
+        {muted ? (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="h-4 w-4"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M17.25 9.75 19.5 12m0 0 2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6 4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"
+            />
+          </svg>
+        ) : (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="h-4 w-4"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"
+            />
+          </svg>
+        )}
+      </button>
+      <button
+        onClick={() => setMuted(!muted)}
+        className="pointer-events-auto absolute right-4 top-36 hidden rounded-lg border border-asphalt-700 bg-asphalt/70 p-2 text-silver-dim backdrop-blur transition hover:text-silver sm:block"
+        title={muted ? 'Unmute' : 'Mute'}
+      >
+        {muted ? (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="h-5 w-5"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M17.25 9.75 19.5 12m0 0 2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6 4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"
+            />
+          </svg>
+        ) : (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="h-5 w-5"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"
+            />
+          </svg>
+        )}
+      </button>
+
+      {/* Leave button */}
+      <button
+        onClick={() => leaveRoom()}
+        className="pointer-events-auto absolute bottom-3 left-1/2 -translate-x-1/2 rounded-lg border border-asphalt-700 bg-asphalt/70 px-4 py-1.5 text-xs text-silver-dim backdrop-blur transition hover:text-silver sm:hidden"
+      >
+        Leave
+      </button>
+      <button
+        onClick={() => leaveRoom()}
+        className="pointer-events-auto absolute right-4 top-24 hidden rounded-lg border border-asphalt-700 bg-asphalt/70 px-3 py-1.5 text-xs text-silver-dim backdrop-blur transition hover:text-silver sm:block"
+      >
+        Leave race
+      </button>
+      {/* Fullscreen button (desktop) */}
+      <FullscreenButton className="pointer-events-auto absolute right-4 top-48 hidden rounded-lg border border-asphalt-700 bg-asphalt/70 p-2 text-silver-dim backdrop-blur transition hover:text-silver sm:block" />
     </div>
   );
 }
